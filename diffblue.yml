@@ -1,0 +1,4324 @@
+buildCmd: gradle build
+testCmd: true
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+  # Constrain the size of arrays created in the analyzed code.
+  java-max-vla-length: 100000
+phases:
+  -
+    # Phase 0 PRETTY, SIMPLE and SMART - pretty tests, do not test private methods directly, Smart-Harness
+    timeout: 180
+    cbmcArguments:
+      # Use simple models first containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [private]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "1a 2b 3c", "A1B2C3", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c", ",", "/", "'"]
+      # Instantiate classes using the simplest constructor strategy
+      smart-harness: simplest-constructor-and-nondet
+  -
+    # Phase 1 PRETTY AND COMPLEX - standard models only, pretty tests, do not test private methods directly, input factory
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "1a 2b 3c", "A1B2C3", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c", ",", "/", "'"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [private]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+      # Limit input factory recursive depth (default 0 = no recursion allowed)
+      java-test-input-factory-bmc-recursion-limit: 4
+  -
+    # Phase 2 FIFO Strategy - pretty tests, do not test private methods directly, fifo
+    timeout: 100
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Add constraint that strings are printable
+      max-nondet-string-length: 100
+      # Explores the program tree breadth-first.
+      paths: fifo
+      # Set string input value
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "1a 2b 3c", "A1B2C3", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c", ",", "/", "'"]
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: false
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [private]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+    # Phase 3 Exceptions - do not test private methods directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers first (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [private]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+    # Phase 4 Direct testing - test private methods directly, increased reflection
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers first (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "1a 2b 3c", "A1B2C3", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c", ",", "/", "'"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+    # PHASE 5 Mocking - aggressive mocking, do not test private methods directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers first (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Only load the class (and related inner/outer classes) containing the method under test,
+      load-containing-class-only: true
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [private]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+units:
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils$GetLinesIterable.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils$1.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/StringUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/StringUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/RuntimeIOException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/RuntimeIOException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ByteStreamGobbler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ByteStreamGobbler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/BZip2PipedOutputStream.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/BZip2PipedOutputStream.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils$EolPreservingLineReaderIterable.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils$LineReaderIterable.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/StreamGobbler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/StreamGobbler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Generics.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Generics.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/EncodingFileReader.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/EncodingFileReader.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils$2.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Timing.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Timing.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/SemanticGraphUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/SemanticGraphUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/StringLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/StringLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/IndexedWord.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/IndexedWord.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/Counter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/Counter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/international/Language.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/international/Language.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/StringUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/StringUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/ClassicCounter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/ClassicCounter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/SemanticGraphUtils$IndexedWordProxy.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/SemanticGraphUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/CollectionUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/CollectionUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/SemanticGraphUtils$EdgeDiffResult.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/SemanticGraphUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/CoreLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/CoreLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/SemanticGraphUtils$TreeNodeProxy.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/SemanticGraphUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/RuntimeInterruptedException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/RuntimeInterruptedException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/ValueLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/ValueLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/graph/DirectedMultiGraph.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/graph/DirectedMultiGraph.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArrayCoreMap.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArrayCoreMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/GrammaticalRelation.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/GrammaticalRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/Tree$TreeIterator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/Tree.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/ISemanticGraphEdgeEql.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/ISemanticGraphEdgeEql.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Pair.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Pair.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Generics.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Generics.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/Word.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/Word.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MutableDouble.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MutableDouble.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/LabeledWord.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/LabeledWord.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/Counters.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/Counters.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/Tree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/Tree.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/Morphology.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/Morphology.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArrayCoreMap$1.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArrayCoreMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MapList.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MapList.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/HasOffset.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/HasOffset.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MapFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MapFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/EnglishGrammaticalRelations.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/EnglishGrammaticalRelations.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/BinaryHeapPriorityQueue$Entry.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/BinaryHeapPriorityQueue.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/SemanticGraph.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/SemanticGraph.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/HasWord.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/HasWord.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MutableInteger.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MutableInteger.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/SemanticGraphUtils$PositionedTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/SemanticGraphUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/graph/Graph.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/graph/Graph.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/BinaryHeapPriorityQueue.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/BinaryHeapPriorityQueue.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/SemanticGraphEdge.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/SemanticGraphEdge.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/graph/DijkstraShortestPath.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/graph/DijkstraShortestPath.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/Label.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/Label.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/SemanticGraphUtils$PrintVerticeParams.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/SemanticGraphUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/TwoDimensionalCounter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/TwoDimensionalCounter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/SemanticGraphFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/SemanticGraphFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/Morpha.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/Morpha.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/StringUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/StringUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils$GetLinesIterable.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/math/SloppyMath.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/math/SloppyMath.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/CoreMap.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/CoreMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/HasWord.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/HasWord.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/CoreLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/CoreLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/RuntimeIOException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/RuntimeIOException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArrayCoreMap.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArrayCoreMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Generics.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Generics.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/CollectionUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/CollectionUtils.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/naturalli/demo/OpenIEServlet.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/naturalli/demo/OpenIEServlet.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/AnnotationPipeline.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/AnnotationPipeline.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/Annotation.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/Annotation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/AnnotatorImplementations.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/AnnotatorImplementations.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/Annotator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/Annotator.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/AnnotatorPool.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/AnnotatorPool.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/AnnotatorPool$CachedAnnotator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/AnnotatorPool.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/IndexedWord.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/IndexedWord.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/naturalli/SentenceFragment.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/naturalli/SentenceFragment.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/CoreLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/CoreLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/RuntimeInterruptedException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/RuntimeInterruptedException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/graph/DirectedMultiGraph.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/graph/DirectedMultiGraph.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArrayCoreMap.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArrayCoreMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/GrammaticalRelation.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/GrammaticalRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/PropertiesUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/PropertiesUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Pair.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Pair.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Generics.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Generics.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Timing.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Timing.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MutableLong.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MutableLong.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/StanfordCoreNLP$AnnotatorSignature.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/StanfordCoreNLP.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/StringUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/StringUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/StanfordCoreNLP.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/StanfordCoreNLP.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/SemanticGraph.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/SemanticGraph.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/util/RelationTriple.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/util/RelationTriple.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Lazy.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Lazy.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/SemanticGraphEdge.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/SemanticGraphEdge.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/LanguageInfo.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/LanguageInfo.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/naturalli/demo/OpenIEServlet$1.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/naturalli/demo/OpenIEServlet.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/CRFLogConditionalObjectiveFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/CRFLogConditionalObjectiveFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/CRFCliqueTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/CRFCliqueTree.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/CliquePotentialFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/CliquePotentialFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/math/ArrayMath.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/math/ArrayMath.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/optimization/AbstractStochasticCachingDiffUpdateFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/optimization/AbstractStochasticCachingDiffUpdateFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/optimization/AbstractCachingDiffFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/optimization/AbstractCachingDiffFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/CRFLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/CRFLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/math/SloppyMath.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/math/SloppyMath.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Pair.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Pair.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/concurrent/ThreadsafeProcessor.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/concurrent/ThreadsafeProcessor.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/FactorTable.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/FactorTable.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/LinearCliquePotentialFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/LinearCliquePotentialFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/optimization/AbstractStochasticCachingDiffFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/optimization/AbstractStochasticCachingDiffFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/RuntimeInterruptedException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/RuntimeInterruptedException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/concurrent/MulticoreWrapper.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/concurrent/MulticoreWrapper.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/concurrent/MulticoreWrapper$CallableJob.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/concurrent/MulticoreWrapper.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Index.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Index.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/CRFLogConditionalObjectiveFunction$ExpectationThreadsafeProcessor.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/CRFLogConditionalObjectiveFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/DataFilePaths.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/DataFilePaths.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/SentenceUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/SentenceUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/ValueLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/ValueLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/WordTag.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/WordTag.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/LabeledWord.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/LabeledWord.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/HasTag.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/HasTag.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/TaggedWord.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/TaggedWord.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/CoreMap.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/CoreMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/Word.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/Word.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/WordLemmaTag.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/WordLemmaTag.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/HasWord.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/HasWord.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/CoreLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/CoreLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/StringLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/StringLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArrayCoreMap.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArrayCoreMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/HasLemma.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/HasLemma.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/Label.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/Label.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/NaiveBayesClassifierFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/NaiveBayesClassifierFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/Counter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/Counter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/LogPrior$LogPriorType.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/LogPrior.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/IntTriple.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/IntTriple.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/LogPrior.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/LogPrior.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Generics.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Generics.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Pair.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Pair.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/LogConditionalObjectiveFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/LogConditionalObjectiveFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/math/ArrayMath.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/math/ArrayMath.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/optimization/QNMinimizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/optimization/QNMinimizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/IntUni.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/IntUni.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/optimization/AbstractCachingDiffFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/optimization/AbstractCachingDiffFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/optimization/AbstractStochasticCachingDiffUpdateFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/optimization/AbstractStochasticCachingDiffUpdateFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MapFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MapFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/GeneralDataset.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/GeneralDataset.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/optimization/AbstractStochasticCachingDiffFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/optimization/AbstractStochasticCachingDiffFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/NaiveBayesClassifierFactory$NBWeights.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/NaiveBayesClassifierFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/ClassicCounter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/ClassicCounter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/HashIndex.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/HashIndex.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/RuntimeInterruptedException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/RuntimeInterruptedException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/LogConditionalEqConstraintFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/LogConditionalEqConstraintFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/IntTuple.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/IntTuple.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Index.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Index.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/RVFDatum.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/RVFDatum.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/Classifier.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/Classifier.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/NaiveBayesClassifier.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/NaiveBayesClassifier.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/optimization/Minimizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/optimization/Minimizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/LexerUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/LexerUtils.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArrayUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArrayUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Generics.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Generics.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Pair.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Pair.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/CollectionUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/CollectionUtils.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$ALIGNMENT.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$GOVERNER.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/IndexedWord.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/IndexedWord.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$RIGHT_IMMEDIATE_SIBLING.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$3.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$GRANDPARENT.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Filters$CategoricalFilter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Filters.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/SemanticGraph.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/SemanticGraph.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$RIGHT_SIBLING.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$1.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/RegexStringFilter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/RegexStringFilter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$2.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$LEFT_IMMEDIATE_SIBLING.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$ADJACENT_NODE.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Filters.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Filters.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$DEPENDENT.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$EQUALS.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$SIBLING_RELATION.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/ParseException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/ParseException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$GRANDKID.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$GRANDSOMETHING.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArrayStringFilter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArrayStringFilter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$LIMITED_GRANDKID.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$LEFT_SIBLING.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$LIMITED_GRANDPARENT.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/CRFLogConditionalObjectiveFunctionForLOP.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/CRFLogConditionalObjectiveFunctionForLOP.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/RuntimeInterruptedException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/RuntimeInterruptedException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/CliquePotentialFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/CliquePotentialFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/math/ArrayMath.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/math/ArrayMath.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/optimization/AbstractCachingDiffFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/optimization/AbstractCachingDiffFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/CRFLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/CRFLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/math/SloppyMath.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/math/SloppyMath.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/FactorTable.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/FactorTable.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/LinearCliquePotentialFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/LinearCliquePotentialFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/CRFCliqueTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/CRFCliqueTree.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Index.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Index.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/CRFLogConditionalObjectiveFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/CRFLogConditionalObjectiveFunction.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/XMLUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/XMLUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/RuntimeIOException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/RuntimeIOException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/XMLUtils$SAXErrorHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/XMLUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Triple.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Triple.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Generics.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Generics.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/XMLUtils$XMLTag.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/XMLUtils.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/misc/DependencyAnalyzer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/misc/DependencyAnalyzer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/misc/DependencyAnalyzer$Identifier.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/misc/DependencyAnalyzer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Generics.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Generics.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/LogisticUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/LogisticUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/RuntimeInterruptedException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/RuntimeInterruptedException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/math/ArrayMath.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/math/ArrayMath.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Index.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Index.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/LogPrior.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/LogPrior.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/WikidictAnnotator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/WikidictAnnotator.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/AnnotatorPool.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/AnnotatorPool.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MetaClass.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MetaClass.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/Annotation.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/Annotation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/PennTreeReader.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/PennTreeReader.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/PennTreebankTokenizer$EnglishTreebankStreamTokenizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/PennTreebankTokenizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/StringUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/StringUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MetaClass$ClassCreationException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MetaClass.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/TreeFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/TreeFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/Tokenizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/Tokenizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MetaClass$ConstructorNotFoundException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MetaClass.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/AnnotationPipeline.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/AnnotationPipeline.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/CoreMap.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/CoreMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ByteStreamGobbler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ByteStreamGobbler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArgumentParser$Option.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArgumentParser.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/RuntimeInterruptedException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/RuntimeInterruptedException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/SystemUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/SystemUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArrayCoreMap.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArrayCoreMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/PropertiesUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/PropertiesUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/StreamGobbler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/StreamGobbler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Generics.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Generics.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/AnnotatorImplementations.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/AnnotatorImplementations.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/SimpleTreeFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/SimpleTreeFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/Tree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/Tree.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/TokenizerAdapter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/TokenizerAdapter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils$GetLinesIterable.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/Annotator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/Annotator.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MutableLong.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MutableLong.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArgumentParser.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArgumentParser.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/HasWord.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/HasWord.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MetaClass$ClassFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MetaClass.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Lazy$2.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Lazy.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/PennTreebankTokenizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/PennTreebankTokenizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/time/Timex.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/time/Timex.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/StanfordCoreNLP.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/StanfordCoreNLP.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/CoreLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/CoreLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/SentenceAnnotator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/SentenceAnnotator.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Pair.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Pair.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/TreeNormalizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/TreeNormalizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/RuntimeIOException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/RuntimeIOException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/BZip2PipedOutputStream.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/BZip2PipedOutputStream.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/AbstractTokenizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/AbstractTokenizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/AnnotatorPool$CachedAnnotator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/AnnotatorPool.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Lazy.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Lazy.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/StanfordCoreNLP$AnnotatorSignature.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/StanfordCoreNLP.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/LabeledScoredTreeFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/LabeledScoredTreeFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/LanguageInfo.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/LanguageInfo.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/HasTag.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/HasTag.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/Label.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/Label.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Timing.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Timing.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/HasIndex.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/HasIndex.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/CoreLabel$CoreLabelFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/CoreLabel.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/machinereading/domains/ace/reader/RobustTokenizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/machinereading/domains/ace/reader/RobustTokenizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/Word.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/Word.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/ValueLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/ValueLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/machinereading/domains/ace/reader/RobustTokenizer$WordToken.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/machinereading/domains/ace/reader/RobustTokenizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/StringLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/StringLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/AbstractTokenizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/AbstractTokenizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Generics.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Generics.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/machinereading/domains/ace/reader/RobustTokenizer$AbbreviationMap.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/machinereading/domains/ace/reader/RobustTokenizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/math/ArrayMath.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/math/ArrayMath.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/RuntimeIOException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/RuntimeIOException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/math/ArrayMath$InvalidElementException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/math/ArrayMath.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/RuntimeInterruptedException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/RuntimeInterruptedException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/StringUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/StringUtils.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/EquivalenceClassEval.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/EquivalenceClassEval.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Sets.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Sets.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/EquivalenceClassEval$Factory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/EquivalenceClassEval.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/Counter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/Counter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/EquivalenceClassEval$1.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/EquivalenceClassEval.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/ClassicCounter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/ClassicCounter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/EquivalenceClassEval$Eval$CollectionContainsChecker.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/EquivalenceClassEval.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Factory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Factory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/EquivalenceClasser.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/EquivalenceClasser.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MapFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MapFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/EquivalenceClassEval$EqualityChecker.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/EquivalenceClassEval.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Generics.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Generics.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MutableDouble.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MutableDouble.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/EquivalenceClassEval$2.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/EquivalenceClassEval.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Pair.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Pair.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/Counters.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/Counters.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/ud/CoNLLUUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/ud/CoNLLUUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/ud/CoNLLUUtils$FeatureNameComparator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/ud/CoNLLUUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/ud/CoNLLUUtils$DepIndexComparator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/ud/CoNLLUUtils.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/coref/statistical/EvalUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/coref/statistical/EvalUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/coref/statistical/EvalUtils$AbstractEvaluator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/coref/statistical/EvalUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/coref/statistical/EvalUtils$MUCEvaluator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/coref/statistical/EvalUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/coref/statistical/EvalUtils$CombinedEvaluator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/coref/statistical/EvalUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/coref/statistical/EvalUtils$B3Evaluator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/coref/statistical/EvalUtils.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/SPIEDServlet.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/SPIEDServlet.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/AnnotationPipeline.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/AnnotationPipeline.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/dep/ApplyDepPatterns$1.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/dep/ApplyDepPatterns.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/StringUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/StringUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/dep/DataInstanceDep.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/dep/DataInstanceDep.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/EncodingFileReader.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/EncodingFileReader.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/DataInstance.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/DataInstance.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/dep/DepPattern.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/dep/DepPattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/CoreLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/CoreLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ReflectionLoading.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ReflectionLoading.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/dep/DepPatternFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/dep/DepPatternFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/ConstantsAndVariables.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/ConstantsAndVariables.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/surface/CreatePatterns.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/surface/CreatePatterns.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/SentenceIndex.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/SentenceIndex.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/surface/SurfacePattern.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/surface/SurfacePattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/surface/Token.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/surface/Token.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/UniversalEnglishGrammaticalRelations.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/UniversalEnglishGrammaticalRelations.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/surface/CreatePatterns$CreatePatternsThread.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/surface/CreatePatterns.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/surface/ApplyPatterns.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/surface/ApplyPatterns.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/dep/ApplyDepPatterns.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/dep/ApplyDepPatterns.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/ScorePatternsFreqBased.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/ScorePatternsFreqBased.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/ScorePhrases.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/ScorePhrases.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/surface/SurfacePatternFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/surface/SurfacePatternFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/surface/DataInstanceSurface.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/surface/DataInstanceSurface.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/SQLConnection.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/SQLConnection.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/surface/PatternsForEachToken.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/surface/PatternsForEachToken.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/surface/LearnImportantFeatures.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/surface/LearnImportantFeatures.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/SequencePattern$VarGroupBindings.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/SequencePattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/surface/PatternToken.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/surface/PatternToken.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/surface/PatternsForEachTokenDB.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/surface/PatternsForEachTokenDB.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/surface/ScorePatternsF1.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/surface/ScorePatternsF1.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/surface/AnnotatedTextReader.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/surface/AnnotatedTextReader.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/CoreLabel$CoreLabelFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/CoreLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/CandidatePhrase.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/CandidatePhrase.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/Annotator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/Annotator.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/SequencePattern$GroupPatternExpr.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/SequencePattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/TokenSequencePattern.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/TokenSequencePattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/WordLemmaTag.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/WordLemmaTag.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/PatternFactory$PatternType.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/PatternFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/StringLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/StringLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/PatternFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/PatternFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Index.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Index.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/Env.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/Env.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/objectbank/ObjectBank.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/objectbank/ObjectBank.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/PhraseScorer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/PhraseScorer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/TokenizerAdapter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/TokenizerAdapter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/SequencePattern$Parser.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/SequencePattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Filters$CategoricalFilter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Filters.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/sequences/SeqClassifierFlags$SlashHyphenEnum.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/sequences/SeqClassifierFlags.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ByteStreamGobbler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ByteStreamGobbler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/GetPatternsFromDataMultiClass.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/GetPatternsFromDataMultiClass.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArrayUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArrayUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/Word.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/Word.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/sequences/CoNLLDocumentReaderAndWriter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/sequences/CoNLLDocumentReaderAndWriter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/GeneralDataset.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/GeneralDataset.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$HeadedBy.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/sequences/CoNLLDocumentReaderAndWriter$CoNLLIterator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/sequences/CoNLLDocumentReaderAndWriter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/ConstantsAndVariables$DataSentsIterator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/ConstantsAndVariables.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/Counter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/Counter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/ParseException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/ParseException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexPattern.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexPattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Filters.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Filters.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$DEPENDENT.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/GrammaticalRelation.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/GrammaticalRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/LogPrior.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/LogPrior.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArrayCoreMap$1.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArrayCoreMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Timing.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Timing.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/LogisticClassifierFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/LogisticClassifierFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$UnbrokenCategoryPrecedes.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/optimization/Minimizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/optimization/Minimizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$ADJACENT_NODE.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/DescriptionPattern.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/DescriptionPattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/SequencePattern.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/SequencePattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/parser/TokenSequenceParser.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/parser/TokenSequenceParser.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/CollectionValuedMap.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/CollectionValuedMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Characters.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Characters.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/CoordinationPattern.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/CoordinationPattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexParserTokenManager.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexParserTokenManager.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/LabeledScoredTreeFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/LabeledScoredTreeFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/objectbank/IdentityFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/objectbank/IdentityFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/Tree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/Tree.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/CollectionUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/CollectionUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/objectbank/IteratorFromReaderFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/objectbank/IteratorFromReaderFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Sets.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Sets.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/PennTreeReader.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/PennTreeReader.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/GoogleNGramsSQLBacked.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/GoogleNGramsSQLBacked.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/SimpleTreeFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/SimpleTreeFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/objectbank/XMLBeginEndIterator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/objectbank/XMLBeginEndIterator.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/SequencePattern$State.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/SequencePattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/BiasedLogisticObjectiveFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/BiasedLogisticObjectiveFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/IndexedWord.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/IndexedWord.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/TreeFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/TreeFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexParseException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexParseException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/objectbank/ReaderIteratorFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/objectbank/ReaderIteratorFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/objectbank/LineIterator$LineIteratorFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/objectbank/LineIterator.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/HashIndex.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/HashIndex.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/objectbank/LineIterator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/objectbank/LineIterator.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/RuntimeInterruptedException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/RuntimeInterruptedException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MetaClass$ClassFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MetaClass.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArrayCoreMap.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArrayCoreMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/SequencePattern$Frag.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/SequencePattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/ScorePatterns.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/ScorePatterns.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/StreamGobbler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/StreamGobbler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/RegexStringFilter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/RegexStringFilter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/optimization/QNMinimizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/optimization/QNMinimizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/SemgrexParserTokenManager.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/SemgrexParserTokenManager.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexPatternCompiler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexPatternCompiler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/Counters.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/Counters.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/EditDistance.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/EditDistance.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/Label.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/Label.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/DocumentPreprocessor$PlainTextIterator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/DocumentPreprocessor.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/ScorePatternsRatioModifiedFreq.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/ScorePatternsRatioModifiedFreq.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/Annotation.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/Annotation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/TextAnnotationPatterns.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/TextAnnotationPatterns.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/HasWord.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/HasWord.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/SequencePattern$PatternExpr.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/SequencePattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ReflectionLoading$ReflectionLoadingException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ReflectionLoading.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/sequences/SeqClassifierFlags.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/sequences/SeqClassifierFlags.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexParser$JJCalls.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexParser.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/graph/DirectedMultiGraph.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/graph/DirectedMultiGraph.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree$1.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/TwoDimensionalCounter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/TwoDimensionalCounter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/GetPatternsFromDataMultiClass$LabelWithSeedWords.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/GetPatternsFromDataMultiClass.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$Heads.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/Token.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/Token.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MetaClass.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MetaClass.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/RVFDataset.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/RVFDataset.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/LogisticObjectiveFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/LogisticObjectiveFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/AnnotatorPool$CachedAnnotator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/AnnotatorPool.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/Tokenizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/Tokenizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/VisibilityHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/VisibilityHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/SentenceUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/SentenceUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/WhitespaceTokenizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/WhitespaceTokenizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/parser/TokenSequenceParser$LookaheadSuccess.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/parser/TokenSequenceParser.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MetaClass$ClassCreationException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MetaClass.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Generics.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Generics.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Pair.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Pair.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/WhitespaceLexer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/WhitespaceLexer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MutableLong.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MutableLong.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Triple.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Triple.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/surface/Token$ClassComparator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/surface/Token.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$GRANDPARENT.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/DocumentPreprocessor$PlainTextIterator$1.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/DocumentPreprocessor.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/optimization/AbstractCachingDiffFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/optimization/AbstractCachingDiffFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/Pattern.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/Pattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/DocumentPreprocessor$XMLIterator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/DocumentPreprocessor.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/TreeNormalizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/TreeNormalizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/AbstractTokenizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/AbstractTokenizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$ImmediatelyHeadedBy.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Lazy.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Lazy.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/WordShapeClassifier.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/WordShapeClassifier.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/CoreLabelTokenFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/CoreLabelTokenFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/PTBTokenizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/PTBTokenizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/Data.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/Data.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/XMLUtils$XMLTag.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/XMLUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/GetPatternsFromDataMultiClass$CalculateSufficientStatsThreads.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/GetPatternsFromDataMultiClass.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/LogisticClassifier.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/LogisticClassifier.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/PTBTokenizer$PTBTokenizerFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/PTBTokenizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/PennTreebankTokenizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/PennTreebankTokenizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/WordTag.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/WordTag.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/surface/PatternsForEachTokenInMemory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/surface/PatternsForEachTokenInMemory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Interner.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Interner.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$HasIthChild.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MutableDouble.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MutableDouble.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MetaClass$ConstructorNotFoundException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MetaClass.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Token.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Token.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/TokenizerFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/TokenizerFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Factory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Factory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/Env.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/Env.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/DocumentPreprocessor.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/DocumentPreprocessor.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/PropertiesUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/PropertiesUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/BZip2PipedOutputStream.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/BZip2PipedOutputStream.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/StanfordCoreNLP$AnnotatorSignature.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/StanfordCoreNLP.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/TwoDimensionalCounterInterface.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/TwoDimensionalCounterInterface.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$RIGHT_IMMEDIATE_SIBLING.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Lazy$2.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Lazy.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/AnnotatorImplementations.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/AnnotatorImplementations.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TokenMgrError.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TokenMgrError.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/SemgrexPattern.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/SemgrexPattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$UnbrokenCategoryFollows.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$GRANDSOMETHING.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/PriorityQueue.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/PriorityQueue.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/SimpleCharStream.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/SimpleCharStream.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/TokenMgrError.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/TokenMgrError.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$GRANDKID.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$UnbrokenCategoryDominates.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils$GetLinesIterable.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/PennTreebankTokenizer$EnglishTreebankStreamTokenizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/PennTreebankTokenizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/HasIndex.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/HasIndex.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/RuntimeIOException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/RuntimeIOException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/objectbank/ReaderIteratorFactory$ReaderIterator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/objectbank/ReaderIteratorFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/LabeledWord.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/LabeledWord.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$EQUALS.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/SemanticGraphEdge.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/SemanticGraphEdge.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/SimpleCharStream.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/SimpleCharStream.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$LIMITED_GRANDPARENT.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/TaggedWord.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/TaggedWord.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$ALIGNMENT.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils$1.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexParser.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexParser.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/SemanticGraph.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/SemanticGraph.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/SemgrexParser.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/SemgrexParser.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$RIGHT_SIBLING.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/ParseException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/ParseException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$LEFT_IMMEDIATE_SIBLING.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$UnbrokenCategoryIsDominatedBy.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/ClassicCounter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/ClassicCounter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$IthChildOf.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$ImmediatelyHeads.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexParser$LookaheadSuccess.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexParser.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$LIMITED_GRANDKID.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/BinaryHeapPriorityQueue.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/BinaryHeapPriorityQueue.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/CoordinationPattern.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/CoordinationPattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArgumentParser$Option.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArgumentParser.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$GOVERNER.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/AbstractIterator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/AbstractIterator.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/RVFDatum.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/RVFDatum.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/RegExFileFilter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/RegExFileFilter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/LanguageInfo.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/LanguageInfo.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/HasTag.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/HasTag.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/StanfordCoreNLP.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/StanfordCoreNLP.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/CollectionFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/CollectionFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/SemgrexParseException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/SemgrexParseException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MapFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MapFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArgumentParser.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArgumentParser.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$LEFT_SIBLING.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/NodePattern.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/NodePattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/semgrex/GraphRelation$SIBLING_RELATION.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/semgrex/GraphRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArrayStringFilter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArrayStringFilter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/AnnotatorPool.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/AnnotatorPool.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/XMLUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/XMLUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/objectbank/ObjectBank$OBIterator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/objectbank/ObjectBank.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/parser/lexparser/ArabicUnknownWordSignatures.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/parser/lexparser/ArabicUnknownWordSignatures.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Interval.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Interval.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/HasInterval.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/HasInterval.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Pair.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Pair.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Interval$RelType.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Interval.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/LogPrior.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/LogPrior.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/math/ArrayMath.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/math/ArrayMath.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/LogPrior$LogPriorType.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/LogPrior.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/parser/common/ArgUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/parser/common/ArgUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Triple.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Triple.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Pair.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Pair.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/NumberRangeFileFilter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/NumberRangeFileFilter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/NumberRangesFileFilter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/NumberRangesFileFilter.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ConvertByteArray.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ConvertByteArray.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/math/SloppyMath.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/math/SloppyMath.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Triple.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Triple.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/surface/SurfacePattern.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/surface/SurfacePattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/StringUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/StringUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/Pattern.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/Pattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MapFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MapFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/surface/SurfacePatternFactory$Genre.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/surface/SurfacePatternFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/CollectionFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/CollectionFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/CollectionValuedMap.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/CollectionValuedMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/CoreLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/CoreLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArrayCoreMap.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArrayCoreMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/surface/PatternToken.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/surface/PatternToken.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/surface/Token$ClassComparator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/surface/Token.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/Env.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/Env.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/patterns/surface/Token.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/patterns/surface/Token.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Trilean.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Trilean.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/CRFNonLinearLogConditionalObjectiveFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/CRFNonLinearLogConditionalObjectiveFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/RuntimeInterruptedException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/RuntimeInterruptedException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/CliquePotentialFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/CliquePotentialFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/math/ArrayMath.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/math/ArrayMath.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/optimization/AbstractCachingDiffFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/optimization/AbstractCachingDiffFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/NonLinearCliquePotentialFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/NonLinearCliquePotentialFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/CRFLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/CRFLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/math/SloppyMath.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/math/SloppyMath.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/FactorTable.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/FactorTable.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/CRFCliqueTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/CRFCliqueTree.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Triple.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Triple.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Generics.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Generics.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Index.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Index.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/sequences/SeqClassifierFlags.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/sequences/SeqClassifierFlags.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/CRFNonLinearSecondOrderLogConditionalObjectiveFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/CRFNonLinearSecondOrderLogConditionalObjectiveFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/CRFCliqueTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/CRFCliqueTree.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/CliquePotentialFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/CliquePotentialFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/math/ArrayMath.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/math/ArrayMath.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/optimization/AbstractCachingDiffFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/optimization/AbstractCachingDiffFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/CRFLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/CRFLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/math/SloppyMath.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/math/SloppyMath.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/FactorTable.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/FactorTable.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/RuntimeInterruptedException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/RuntimeInterruptedException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/crf/NonLinearSecondOrderCliquePotentialFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/crf/NonLinearSecondOrderCliquePotentialFunction.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Quadruple.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Quadruple.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Index.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Index.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/sequences/SeqClassifierFlags.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/sequences/SeqClassifierFlags.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/machinereading/structure/AnnotationUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/machinereading/structure/AnnotationUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/CoreMap.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/CoreMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArrayCoreMap.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArrayCoreMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/CoreLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/CoreLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/Annotation.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/Annotation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/machinereading/structure/RelationMention.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/machinereading/structure/RelationMention.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/StringLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/StringLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/StringUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/StringUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/machinereading/structure/Span.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/machinereading/structure/Span.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/machinereading/structure/ExtractionObject.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/machinereading/structure/ExtractionObject.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/machinereading/structure/EntityMention.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/machinereading/structure/EntityMention.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/machinereading/structure/EventMention.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/machinereading/structure/EventMention.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ie/machinereading/structure/RelationMentionFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ie/machinereading/structure/RelationMentionFactory.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/PRCurve.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/PRCurve.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/PriorityQueue.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/PriorityQueue.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/StringUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/StringUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/objectbank/IteratorFromReaderFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/objectbank/IteratorFromReaderFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/objectbank/ReaderIteratorFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/objectbank/ReaderIteratorFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/objectbank/LineIterator$LineIteratorFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/objectbank/LineIterator.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/objectbank/LineIterator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/objectbank/LineIterator.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/objectbank/ObjectBank$OBIterator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/objectbank/ObjectBank.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/BinaryHeapPriorityQueue.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/BinaryHeapPriorityQueue.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/AbstractIterator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/AbstractIterator.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Triple.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Triple.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Pair.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Pair.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MapFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MapFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/RuntimeIOException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/RuntimeIOException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/objectbank/ReaderIteratorFactory$ReaderIterator.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/objectbank/ReaderIteratorFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/objectbank/ObjectBank.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/objectbank/ObjectBank.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/objectbank/IdentityFunction.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/objectbank/IdentityFunction.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/TSVUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/TSVUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$IthChildOf.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/IndexedWord.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/IndexedWord.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/ParseException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/ParseException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/SemanticGraph.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/SemanticGraph.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexPattern.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexPattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TokenMgrError.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TokenMgrError.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexParseException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexParseException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexParser.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexParser.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArrayCoreMap.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArrayCoreMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$UnbrokenCategoryFollows.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Interner.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Interner.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$Heads.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$HasIthChild.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/GrammaticalRelation.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/GrammaticalRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexParser$LookaheadSuccess.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexParser.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Generics.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Generics.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexPatternCompiler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexPatternCompiler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Pair.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Pair.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$ImmediatelyHeadedBy.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$UnbrokenCategoryDominates.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/SimpleCharStream.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/SimpleCharStream.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/UniversalEnglishGrammaticalRelations.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/UniversalEnglishGrammaticalRelations.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexParser$JJCalls.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexParser.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Token.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Token.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$UnbrokenCategoryPrecedes.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/CoreLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/CoreLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/DescriptionPattern.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/DescriptionPattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/Annotation.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/Annotation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/graph/DirectedMultiGraph.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/graph/DirectedMultiGraph.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MapFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MapFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/CoordinationPattern.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/CoordinationPattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$UnbrokenCategoryIsDominatedBy.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexParserTokenManager.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexParserTokenManager.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$ImmediatelyHeads.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/SemanticGraphEdge.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/SemanticGraphEdge.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArrayStringFilter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArrayStringFilter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$HeadedBy.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/quoteattribution/QuoteAttributionUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/quoteattribution/QuoteAttributionUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$IthChildOf.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/LabelFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/LabelFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/Counter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/Counter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/StringUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/StringUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/TreeGraphNode.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/TreeGraphNode.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TokenMgrError.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TokenMgrError.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/quoteattribution/BammanCorefReader.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/quoteattribution/BammanCorefReader.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/SequencePattern$ConjMatchStateInfo.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/SequencePattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/CoreMap.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/CoreMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$HasIthChild.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/CoreLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/CoreLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/SemanticGraphFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/SemanticGraphFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/SequencePattern$State.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/SequencePattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Filters.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Filters.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/IndexedWord.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/IndexedWord.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/ValueLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/ValueLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/parser/nndep/DependencyTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/parser/nndep/DependencyTree.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/GrammaticalRelation.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/GrammaticalRelation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArraySet.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArraySet.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/parser/nndep/DependencyParser.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/parser/nndep/DependencyParser.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/WordToSentenceProcessor.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/WordToSentenceProcessor.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Pair.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Pair.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/parser/nndep/Configuration.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/parser/nndep/Configuration.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/TypedDependency.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/TypedDependency.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Generics.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Generics.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/SequenceMatcher$MatchedStates.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/SequenceMatcher.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/math/ArrayMath.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/math/ArrayMath.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$UnbrokenCategoryPrecedes.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/RuntimeIOException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/RuntimeIOException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/HasWord.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/HasWord.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/parser/nndep/ParsingSystem.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/parser/nndep/ParsingSystem.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils$GetLinesIterable.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/DescriptionPattern.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/DescriptionPattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/SequencePattern.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/SequencePattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/SemanticGraph.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/SemanticGraph.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MapFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MapFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/SequenceMatcher$BranchStates.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/SequenceMatcher.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/CoordinationPattern.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/CoordinationPattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/MultiTokenTag.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/MultiTokenTag.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$ImmediatelyHeadedBy.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexParserTokenManager.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexParserTokenManager.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/semgraph/SemanticGraphEdge.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/semgraph/SemanticGraphEdge.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/Label.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/Label.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/Tree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/Tree.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$HeadedBy.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/ClassicCounter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/ClassicCounter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/quoteattribution/Person.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/quoteattribution/Person.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/EnglishGrammaticalStructure.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/EnglishGrammaticalStructure.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/Annotation.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/Annotation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/ParseException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/ParseException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/SequenceMatcher.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/SequenceMatcher.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexPattern.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexPattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexParseException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexParseException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexParser.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexParser.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/HashIndex.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/HashIndex.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/SequenceMatcher$State.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/SequenceMatcher.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Interner.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Interner.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/RuntimeInterruptedException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/RuntimeInterruptedException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/coref/data/CorefChain.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/coref/data/CorefChain.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArrayCoreMap.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArrayCoreMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/BasicSequenceMatchResult$MatchedGroup.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/BasicSequenceMatchResult.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexParser$LookaheadSuccess.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexParser.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexPatternCompiler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexPatternCompiler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$Heads.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/BasicSequenceMatchResult.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/BasicSequenceMatchResult.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$UnbrokenCategoryDominates.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/GrammaticalStructure.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/GrammaticalStructure.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/SimpleCharStream.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/SimpleCharStream.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Filters$CategoricalFilter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Filters.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/StringLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/StringLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$UnbrokenCategoryFollows.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/tokensregex/SequenceMatcher$BranchState.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/tokensregex/SequenceMatcher.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/graph/DirectedMultiGraph.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/graph/DirectedMultiGraph.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/Word.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/Word.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Token.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Token.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexParser$JJCalls.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexParser.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/UniversalEnglishGrammaticalStructure.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/UniversalEnglishGrammaticalStructure.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$ImmediatelyHeads.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/Relation$UnbrokenCategoryIsDominatedBy.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/Relation.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalStructure.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalStructure.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArrayStringFilter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArrayStringFilter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/Counters.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/Counters.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/parser/nndep/Classifier.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/parser/nndep/Classifier.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/parser/shiftreduce/ShiftReduceUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/parser/shiftreduce/ShiftReduceUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/CoreLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/CoreLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/parser/common/ParserConstraint.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/parser/common/ParserConstraint.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/parser/shiftreduce/BinaryTransition$Side.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/parser/shiftreduce/BinaryTransition.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/TreeShapedStack.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/TreeShapedStack.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArrayCoreMap.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArrayCoreMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/parser/shiftreduce/State.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/parser/shiftreduce/State.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/Label.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/Label.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/Tree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/Tree.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/international/spanish/pipeline/MultiWordPreprocessor$ManualUWModel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/international/spanish/pipeline/MultiWordPreprocessor.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/WordShapeClassifier.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/WordShapeClassifier.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/pennchinese/ChineseUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/pennchinese/ChineseUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Generics.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Generics.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/LanguageInfo.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/LanguageInfo.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/RuntimeIOException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/RuntimeIOException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/pipeline/LanguageInfo$HumanLanguage.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/pipeline/LanguageInfo.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/AccuracyStats.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/AccuracyStats.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/ProbabilisticClassifier.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/ProbabilisticClassifier.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/PriorityQueue.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/PriorityQueue.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/Counter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/Counter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/StringUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/StringUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/MapFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/MapFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/IOUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/IOUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/io/RuntimeIOException.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/io/RuntimeIOException.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Pair.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Pair.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/GeneralDataset.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/GeneralDataset.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/classify/PRCurve.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/classify/PRCurve.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/BinaryHeapPriorityQueue.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/BinaryHeapPriorityQueue.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/parser/lexparser/TrainOptions.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/parser/lexparser/TrainOptions.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/Label.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/Label.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/Tree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/Tree.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/gui/PreferencesPanel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/gui/PreferencesPanel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/gui/FilePanel$1.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/gui/FilePanel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/CoreLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/CoreLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/UniversalSemanticHeadFinder.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/UniversalSemanticHeadFinder.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/pennchinese/NoEmptiesCTBTreeReaderFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/pennchinese/NoEmptiesCTBTreeReaderFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Generics.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Generics.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/pennchinese/ChineseTreebankLanguagePack.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/pennchinese/ChineseTreebankLanguagePack.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/pennchinese/ChineseSemanticHeadFinder.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/pennchinese/ChineseSemanticHeadFinder.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/TreebankLanguagePack.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/TreebankLanguagePack.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/pennchinese/SunJurafskyChineseHeadFinder.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/pennchinese/SunJurafskyChineseHeadFinder.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexPatternCompiler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexPatternCompiler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/TreeNormalizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/TreeNormalizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/gui/Preferences.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/gui/Preferences.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/StringLabeledScoredTreeReaderFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/StringLabeledScoredTreeReaderFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/pennchinese/CTBErrorCorrectingTreeNormalizer$ChineseEmptyFilter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/pennchinese/CTBErrorCorrectingTreeNormalizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/CoreLabelTokenFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/CoreLabelTokenFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/pennchinese/BikelChineseHeadFinder.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/pennchinese/BikelChineseHeadFinder.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/pennchinese/CTBTreeReaderFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/pennchinese/CTBTreeReaderFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/pennchinese/CTBErrorCorrectingTreeNormalizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/pennchinese/CTBErrorCorrectingTreeNormalizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/gui/InputPanel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/gui/InputPanel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/PennTreebankLanguagePack.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/PennTreebankLanguagePack.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/SimpleTreeFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/SimpleTreeFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/gui/MatchesPanel$1.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/gui/MatchesPanel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexPattern$TRegexTreeReaderFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexPattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/international/arabic/process/ArabicTokenizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/international/arabic/process/ArabicTokenizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/process/TokenizerFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/process/TokenizerFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/SemanticHeadFinder.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/SemanticHeadFinder.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/gui/MatchesPanel$MatchCellRenderer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/gui/MatchesPanel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/gui/MatchesPanel$TreeTransferHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/gui/MatchesPanel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/pennchinese/ChineseHeadFinder.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/pennchinese/ChineseHeadFinder.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/CoreLabel$CoreLabelFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/CoreLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/HeadFinder.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/HeadFinder.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/CollinsHeadFinder.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/CollinsHeadFinder.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/TregexPattern$TRegexTreeReaderFactory$1.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/TregexPattern.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/gui/TregexGUI$2.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/gui/TregexGUI.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/AbstractCollinsHeadFinder.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/AbstractCollinsHeadFinder.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/negra/NegraHeadFinder.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/negra/NegraHeadFinder.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/negra/NegraPennLanguagePack.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/negra/NegraPennLanguagePack.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Filters.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Filters.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/BobChrisTreeNormalizer$EmptyFilter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/BobChrisTreeNormalizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/gui/FilePanel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/gui/FilePanel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/international/arabic/process/ArabicTokenizer$ArabicTokenizerFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/international/arabic/process/ArabicTokenizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/gui/PreferencesPanel$1.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/gui/PreferencesPanel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/ModCollinsHeadFinder.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/ModCollinsHeadFinder.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/tuebadz/TueBaDZLanguagePack.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/tuebadz/TueBaDZLanguagePack.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/tuebadz/TueBaDZHeadFinder.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/tuebadz/TueBaDZHeadFinder.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/arabic/ArabicHeadFinder.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/arabic/ArabicHeadFinder.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/gui/FilePanel$FileTreeCellRenderer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/gui/FilePanel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/gui/TregexGUI$1.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/gui/TregexGUI.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/LabeledScoredTreeFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/LabeledScoredTreeFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/arabic/ArabicTreeReaderFactory$ArabicRawTreeReaderFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/arabic/ArabicTreeReaderFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/arabic/ArabicHeadFinder$TagSet.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/arabic/ArabicHeadFinder.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/arabic/ArabicTreeReaderFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/arabic/ArabicTreeReaderFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/arabic/ArabicTreebankLanguagePack.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/arabic/ArabicTreebankLanguagePack.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/Filters$CollectionAcceptFilter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/Filters.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/BobChrisTreeNormalizer$AOverAFilter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/BobChrisTreeNormalizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/french/FrenchTreebankLanguagePack.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/french/FrenchTreebankLanguagePack.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/PennTreeReaderFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/PennTreeReaderFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/swing/TooltipJList.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/swing/TooltipJList.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/gui/DisplayMatchesPanel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/gui/DisplayMatchesPanel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/gui/FileTreeNode.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/gui/FileTreeNode.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/TreeReaderFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/TreeReaderFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/AbstractTreebankLanguagePack.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/AbstractTreebankLanguagePack.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/french/DybroFrenchHeadFinder.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/french/DybroFrenchHeadFinder.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/international/french/FrenchTreeReaderFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/international/french/FrenchTreeReaderFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/LeftHeadFinder.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/LeftHeadFinder.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/gui/PreferencesPanel$ColorIcon.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/gui/PreferencesPanel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/gui/MatchesPanel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/gui/MatchesPanel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/BobChrisTreeNormalizer.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/BobChrisTreeNormalizer.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/gui/TregexGUI.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/gui/TregexGUI.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/LabeledScoredTreeReaderFactory.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/LabeledScoredTreeReaderFactory.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/gui/FileTreeModel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/gui/FileTreeModel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/trees/tregex/gui/DisplayMatchesPanel$DisplayTransferHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/trees/tregex/gui/DisplayMatchesPanel.java
+ - target:
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/sequences/IOBUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/sequences/IOBUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ArrayCoreMap.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ArrayCoreMap.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/ling/CoreLabel.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/ling/CoreLabel.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/stats/Counter.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/stats/Counter.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Record.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/ErasureUtils.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/ErasureUtils.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/LogRecordHandler.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/LogRecordHandler.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/PaddedList.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/PaddedList.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
+   - dir: build/classes/java/main
+     file: edu/stanford/nlp/util/logging/Redwood$Util.class
+     sourceDir: src
+     sourceFile: edu/stanford/nlp/util/logging/Redwood.java
